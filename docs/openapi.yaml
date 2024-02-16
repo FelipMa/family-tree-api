@@ -1,0 +1,357 @@
+openapi: 3.0.0
+info:
+  title: family-tree-api
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+
+components:
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+tags:
+  - name: Users
+    description: Users endpoints that don't require authentication
+  - name: Individuals
+    description: Individuals endpoints
+  - name: Relationships
+    description: Relationships endpoints
+
+paths:
+  /register:
+    post:
+      tags:
+        - Users
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+            example:
+              email: email@example.com
+              password: 123456
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              example:
+                id: uuid
+                email: email@example.com
+                createdAt: 2021-01-01T00:00:00.000Z
+                updatedAt: 2021-01-01T00:00:00.000Z
+  /login:
+    post:
+      tags:
+        - Users
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+            example:
+              email: email@example.com
+              password: 123456
+      responses:
+        "200":
+          description: User logged in
+          content:
+            application/json:
+              example:
+                token: jwt
+  /individuals:
+    post:
+      tags:
+        - Individuals
+      summary: Create a new individual
+      security:
+        - JWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                birthday:
+                  type: string
+                  format: date-time
+                generation:
+                  type: integer
+                is_alive:
+                  type: boolean
+                death:
+                  type: string
+                  format: date-time
+            example:
+              name: John Doe
+              image: https://example.com/image.jpg
+              birthday: 2021-01-01T00:00:00.000Z
+              generation: 1
+              is_alive: false
+              death: 2021-01-01T00:00:00.000Z
+      responses:
+        "201":
+          description: Individual created
+          content:
+            application/json:
+              example:
+                id: uuid
+                name: John Doe
+                image: https://example.com/image.jpg
+                birthday: 2021-01-01T00:00:00.000Z
+                generation: 1
+                is_alive: false
+                death: 2021-01-01T00:00:00.000Z
+    get:
+      tags:
+        - Individuals
+      summary: Get all individuals
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: Successfull response
+          content:
+            application/json:
+              example:
+                - id: uuid
+                  name: John Doe
+                  image: https://example.com/image.jpg
+                  birthday: 2021-01-01T00:00:00.000Z
+                  generation: 1
+                  is_alive: false
+                  death: 2021-01-01T00:00:00.000Z
+                - id: uuid
+                  name: Jane Doe
+                  image: https://example.com/image.jpg
+                  birthday: 2021-01-01T00:00:00.000Z
+                  generation: 1
+                  is_alive: false
+                  death: 2021-01-01T00:00:00.000Z
+  /individuals/{id}:
+    get:
+      tags:
+        - Individuals
+      summary: Get individual by id
+      security:
+        - JWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfull response
+          content:
+            application/json:
+              example:
+                id: uuid
+                name: John Doe
+                image: https://example.com/image.jpg
+                birthday: 2021-01-01T00:00:00.000Z
+                generation: 1
+                is_alive: false
+                death: 2021-01-01T00:00:00.000Z
+    patch:
+      tags:
+        - Individuals
+      summary: Update individual by id, only provided fields will be updated
+      security:
+        - JWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                birthday:
+                  type: string
+                  format: date-time
+                generation:
+                  type: integer
+                is_alive:
+                  type: boolean
+                death:
+                  type: string
+                  format: date-time
+            example:
+              name: John Doe
+              image: https://example.com/image.jpg
+              birthday: 2021-01-01T00:00:00.000Z
+              generation: 1
+              is_alive: false
+              death: 2021-01-01T00:00:00.000Z
+      responses:
+        "200":
+          description: Successfull response
+          content:
+            application/json:
+              example:
+                id: uuid
+                name: John Doe
+                image: https://example.com/image.jpg
+                birthday: 2021-01-01T00:00:00.000Z
+                generation: 1
+                is_alive: false
+                death: 2021-01-01T00:00:00.000Z
+    delete:
+      tags:
+        - Individuals
+      summary: Delete individual by id
+      security:
+        - JWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Successfull response
+  /relationships:
+    post:
+      tags:
+        - Relationships
+      summary: Create a new relationship (Types - PARENT_SON, MARRIAGE, DIVORCE)
+      security:
+        - JWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                relationship_type:
+                  type: string
+                from_individual_id:
+                  type: string
+                to_individual_id:
+                  type: string
+            example:
+              relationship_type: PARENT_SON
+              from_individual_id: uuid
+              to_individual_id: uuid
+      responses:
+        "201":
+          description: Relationship created
+          content:
+            application/json:
+              example:
+                relationship_type: PARENT_SON
+                from_individual_id: uuid
+                to_individual_id: uuid
+    get:
+      tags:
+        - Relationships
+      summary: Get all relationships
+      security:
+        - JWT: []
+      responses:
+        "200":
+          description: Successfull response
+          content:
+            application/json:
+              example:
+                - relationship_type: PARENT_SON
+                  from_individual_id: uuid
+                  to_individual_id: uuid
+                - relationship_type: PARENT_SON
+                  from_individual_id: uuid
+                  to_individual_id: uuid
+  /relationships/{from_id}/{to_id}:
+    patch:
+      tags:
+        - Relationships
+      summary: Update relationship by id, can only update relationship_type
+      security:
+        - JWT: []
+      parameters:
+        - name: from_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: to_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                relationship_type:
+                  type: string
+            example:
+              relationship_type: PARENT_SON
+      responses:
+        "200":
+          description: Successfull response
+          content:
+            application/json:
+              example:
+                relationship_type: PARENT_SON
+                from_individual_id: uuid
+                to_individual_id: uuid
+    delete:
+      tags:
+        - Relationships
+      summary: Delete relationship by id
+      security:
+        - JWT: []
+      parameters:
+        - name: from_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: to_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Successfull response
