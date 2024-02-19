@@ -1,7 +1,13 @@
-use axum::{http::Method, routing::delete, routing::get, routing::patch, routing::post, Router};
+use axum::{
+    http::Method,
+    middleware,
+    routing::{delete, get, patch, post},
+    Router,
+};
 use tower_http::cors::{Any, CorsLayer};
 mod database;
 mod handlers;
+mod middlewares;
 mod queries;
 
 pub async fn run() {
@@ -10,8 +16,6 @@ pub async fn run() {
         .allow_origin(Any);
 
     let app = Router::new()
-        .route("/register", post(handlers::users::register::register))
-        .route("/login", post(handlers::users::login::login))
         .route(
             "/individuals",
             post(handlers::individuals::post_individual::post_individual),
@@ -48,7 +52,12 @@ pub async fn run() {
             "/relationships/:from_id/:to_id",
             patch(handlers::relationships::patch_relationship::patch_relationship),
         )
+        .layer(middleware::from_fn(
+            middlewares::auth::auth_middleware_user_admin,
+        ))
         .route("/", get(handlers::hello_world::hello_world))
+        .route("/register", post(handlers::users::register::register))
+        .route("/login", post(handlers::users::login::login))
         .layer(cors);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:8080")

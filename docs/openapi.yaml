@@ -78,6 +78,12 @@ paths:
             application/json:
               example:
                 token: jwt
+                user:
+                  id: uuid
+                  email: email@example.com
+                  isAdmin: false
+                  createdAt: 2021-01-01T00:00:00.000Z
+                  updatedAt: 2021-01-01T00:00:00.000Z
   /individuals:
     post:
       tags:
